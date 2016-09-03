@@ -1,0 +1,65 @@
+var gulp = require("gulp"),
+    jshint = require("gulp-jshint"),
+    sass = require("gulp-sass"),
+    watch = require('gulp-watch'),
+    browserSync = require("browser-sync").create(),
+    autoprefixer = require('gulp-autoprefixer')
+    ;
+
+
+gulp.task("libs:js", function () {
+    return gulp.src([
+        './node_modules/jquery/dist/jquery.min.js',
+        './node_modules/tether/dist/js/tether.min.js',
+        './node_modules/bootstrap/dist/js/bootstrap.min.js'
+    ])
+        .pipe(gulp.dest('./app/libs/js'));
+});
+
+gulp.task("libs:css", ["libs:fonts"], function () {
+    return gulp.src([
+        './node_modules/font-awesome/css/font-awesome.min.css',
+        './node_modules/bootstrap/dist/css/bootstrap.min.css'
+    ])
+        .pipe(gulp.dest('./app/libs/css'));
+});
+
+gulp.task("libs:fonts", function () {
+    return gulp.src(['./node_modules/font-awesome/fonts/*'
+    ])
+        .pipe(gulp.dest('./app/libs/fonts'));
+});
+
+gulp.task("jshint", function () {
+    return gulp.src("app/*.js")
+        .pipe(jshint())
+        .pipe(jshint.reporter("default"))
+        .pipe(browserSync.stream())
+});
+
+gulp.task("sass", function () {
+    return gulp.src("app/*.scss")
+        .pipe(sass())
+        .pipe(autoprefixer({
+            browsers: ['last 10 versions'],
+            cascade: false
+        }))
+        .pipe(gulp.dest("app/css"))
+        .pipe(browserSync.stream())
+});
+
+gulp.task('watch', function () {
+    browserSync.init({
+        browser: "firefox",
+        server: {
+            baseDir: "./app"
+        }
+    });
+
+    gulp.watch('app/*.html', browserSync.reload);
+    gulp.watch('app/*.js', ["jshint"]);
+    gulp.watch('app/*.scss', ["sass"]);
+});
+
+gulp.task("default", ["libs:js", "libs:css", "watch"]);
+
